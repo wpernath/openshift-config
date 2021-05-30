@@ -109,7 +109,7 @@ command.help() {
   cat <<-EOF
   Provides some functions to make an OpenShift Single Node Cluster usable
   Usage:
-      snc [command] [options]
+      config-snc.sh [command] [options]
   
   Example:
       snc all -h 192.168.2.23
@@ -134,7 +134,7 @@ command.persistant-volumes() {
 
 command.registry() {
     # Apply registry pvc to bound with pv0001
-    cat > paul.yaml <<EOF 
+    cat > /tmp/claim.yaml <<EOF 
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -151,7 +151,7 @@ spec:
       volume: "pv0001"
 EOF
 
-    cat paul.yaml | oc apply -f -
+    cat /tmp/claim.yaml | oc apply -f -
     
     # Add registry storage to pvc
     oc patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "add", "path": "/spec/storage/pvc", "value": {"claim": "snc-image-registry-storage"}}]' --type=json
@@ -193,8 +193,16 @@ EOF
 }
 
 command.ci() {
-    oc new project ci
-    
+    #oc new-project ci > /dev/null
+    oc apply -f $SCRIPT_DIR/support/nexus.yaml
+    oc apply -f $SCRIPT_DIR/support/gogs.yaml
+    GOGS_HOSTNAME=$(oc get route gogs -o template --template='{{.spec.host}}')
+    info "Gogs Hostname: $GOGS_HOSTNAME"
+
+    info "Initiatlizing git repository in Gogs and configuring webhooks"
+    sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply -f - 
+    oc rollout status deployment/gogs
+
 }
 
 command.all() {
