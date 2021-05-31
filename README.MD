@@ -53,6 +53,7 @@ Gogs: gogs/gogs
 $> ./config-snc.sh add-users 
 ```
 This adds a HTPasswd identity provider to the cluster with 2 users in it:
+
 admin/admin123 -> cluster-admin
 
 developer/developer -> normal user
