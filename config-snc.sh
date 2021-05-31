@@ -31,7 +31,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    persistant-volumes|registry|operators|ci|all)
+    persistant-volumes|registry|operators|ci|create-users|all)
       COMMAND=$1
       shift
       ;;
@@ -119,6 +119,7 @@ command.help() {
       registry                       Setup internal image registry to use a PVC and accept requests
       operators                      Install gitops and pipeline operators
       ci                             Install Nexus and Gogs in a ci namespace
+      create-users                   Creates two users: admin/admin123 and developer/developer
       all                            call all modules
       help                           Help about this command
 
@@ -201,14 +202,25 @@ command.ci() {
 
     info "Initiatlizing git repository in Gogs and configuring webhooks"
     sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply -f - 
-    oc rollout status deployment/gogs
-
-    
+    oc rollout status deployment/gogs 
 }
+
+command.create-users() {
+    # create a secret
+    oc create secret generic htpass-secret --from-file=htpasswd=$SCRIPT_DIR/support/htpasswd -n openshift-config
+
+    # create the CR
+    oc apply -f $SCRIPT_DIR/support/htpasswd-cr.yaml -n openshift-config
+
+    # we want admin be cluster-admin
+    oc adm policy add-cluster-role-to-user cluster-admin admin
+}
+
 
 command.all() {
     command.persistant-volumes
     command.registry
+    command.create-users
     command.operators
     command.ci
 }

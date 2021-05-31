@@ -47,3 +47,14 @@ Nexus: admin/admin123
 
 Gogs: gogs/gogs
 
+
+### add-user
+```bash
+$> ./config-snc.sh add-users 
+```
+This adds a HTPasswd identity provider to the cluster with 2 users in it:
+admin/admin123 -> cluster-admin
+
+developer/developer -> normal user
+
+You need to be logged into OpenShift with cluster-admin rights.
