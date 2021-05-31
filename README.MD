@@ -44,5 +44,6 @@ $> ./config-snc.sh ci
 This installs a nexus and Gogs into a newly created namespace called ci. After that it prints out the access to both instances. By default, we are using
 
 Nexus: admin/admin123
+
 Gogs: gogs/gogs
 
