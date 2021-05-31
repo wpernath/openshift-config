@@ -203,6 +203,7 @@ command.ci() {
     sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply -f - 
     oc rollout status deployment/gogs
 
+    
 }
 
 command.all() {
