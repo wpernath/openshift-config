@@ -43,19 +43,16 @@ $> ./config-snc.sh ci
 
 This installs a nexus and Gogs into a newly created namespace called ci. After that it prints out the access to both instances. By default, we are using
 
-Nexus: admin/admin123
+- Nexus: admin/admin123
+- Gogs: gogs/gogs
 
-Gogs: gogs/gogs
 
-
-### add-user
+### create-users
 ```bash
-$> ./config-snc.sh add-users 
+$> ./config-snc.sh create-users 
 ```
 This adds a HTPasswd identity provider to the cluster with 2 users in it:
-
-admin/admin123 -> cluster-admin
-
-developer/developer -> normal user
+- admin/admin123 -> cluster-admin
+- devel/devel -> normal user
 
 You need to be logged into OpenShift with cluster-admin rights.

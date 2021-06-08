@@ -194,23 +194,46 @@ EOF
 }
 
 command.ci() {
-    #oc new-project ci > /dev/null
-    oc apply -f $SCRIPT_DIR/support/nexus.yaml
-    oc apply -f $SCRIPT_DIR/support/gogs.yaml
-    GOGS_HOSTNAME=$(oc get route gogs -o template --template='{{.spec.host}}')
-    info "Gogs Hostname: $GOGS_HOSTNAME"
+    oc get ns $ci 2>/dev/null  || {
+      info "Creating CI project" 
+      oc new-project ci > /dev/null
 
-    info "Initiatlizing git repository in Gogs and configuring webhooks"
-    sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply -f - 
-    oc rollout status deployment/gogs 
+      oc apply -f $SCRIPT_DIR/support/nexus.yaml --namespace ci
+      oc apply -f $SCRIPT_DIR/support/gogs.yaml --namespace ci
+      GOGS_HOSTNAME=$(oc get route gogs -o template --template='{{.spec.host}}')
+      info "Gogs Hostname: $GOGS_HOSTNAME"
+
+      info "Initiatlizing git repository in Gogs and configuring webhooks"
+      sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply --namespace ci -f - 
+      oc rollout status deployment/gogs --namespace ci
+      oc create -f support/gogs-init-taskrun.yaml --namespace ci
+    }
 }
 
 command.create-users() {
-    # create a secret
-    oc create secret generic htpass-secret --from-file=htpasswd=$SCRIPT_DIR/support/htpasswd -n openshift-config
+    oc get secret htpass-secret -n openshift-config 2>/dev/null || {
+      info "No htpass provider availble, creating new one"
+      # create a secret
+      oc create secret generic htpass-secret --from-file=htpasswd=$SCRIPT_DIR/support/htpasswd -n openshift-config
 
-    # create the CR
-    oc apply -f $SCRIPT_DIR/support/htpasswd-cr.yaml -n openshift-config
+      # create the CR
+      oc apply -f $SCRIPT_DIR/support/htpasswd-cr.yaml -n openshift-config
+    } && {
+      info "Changing existing htpass-secret file to add devel/devel and admin/admin123"
+      oc get secret htpass-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > /tmp/users.htpasswd
+      
+      info "Existing users"
+      cat /tmp/users.htpasswd 
+      echo "\n"
+
+      htpasswd -bB /tmp/users.htpasswd admin admin123
+      htpasswd -bB /tmp/users.htpasswd devel devel
+
+      cat /tmp/users.htpasswd
+
+      oc create secret generic htpass-secret --from-file=htpasswd=/tmp/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+
+    }
 
     # we want admin be cluster-admin
     oc adm policy add-cluster-role-to-user cluster-admin admin
