@@ -9,6 +9,7 @@ This is what the script does right now:
 - Configuring the internal registry to be able to store images
 - Installing some operators (namely gitops and pipelines) for demo purposes
 - Setting up a 'ci' namespace with nexus and Gogs ready to use
+- Setting up a htpasswd identity provider for 2 users
 
 ## Usage
 ### persistant-volumes
