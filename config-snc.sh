@@ -5,6 +5,8 @@
 # First, you have to install the SNC in your network. Then you are logging into it with kubeadmin
 # THEN you can let this script run, which will create PVs in the VM and configures the 
 # internal registry to use one of the PVs for storing everything.
+# 
+# Please see README.MD for more details.
 #
 set -e -u -o pipefail
 
@@ -224,7 +226,7 @@ command.create-users() {
       
       info "Existing users"
       cat /tmp/users.htpasswd 
-      echo "\n"
+      echo >> /tmp/users.htpasswd
 
       htpasswd -bB /tmp/users.htpasswd admin admin123
       htpasswd -bB /tmp/users.htpasswd devel devel
