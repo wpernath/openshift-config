@@ -196,7 +196,7 @@ EOF
 }
 
 command.ci() {
-    oc get ns $ci 2>/dev/null  || {
+    oc get ns ci 2>/dev/null  || {
       info "Creating CI project" 
       oc new-project ci > /dev/null
 
