@@ -109,19 +109,28 @@ function create_pvs() {
 
 command.help() {
   cat <<-EOF
-  Provides some functions to make an OpenShift Single Node Cluster usable
+  Provides some functions to make an OpenShift Single Node Cluster usable. 
+  
+  NOTE: First, you need to install an OpenShift Single Node Cluster (CRC or SNO). Then you
+  have to log into it using the kubeadmin credentials provided. 
+
+  oc login -u kubeadmin -p <your kubeadmin hash> https://api.crc.testing:6443
+
+  And THEN you can issue this script.
+  
+
   Usage:
       config-snc.sh [command] [options]
   
   Example:
-      snc all -h 192.168.2.23
+      config-snc.sh all -h 192.168.2.23
   
   COMMANDS:
       persistant-volumes             Setup 30 persistant volumes on SNC host
       registry                       Setup internal image registry to use a PVC and accept requests
       operators                      Install gitops and pipeline operators
       ci                             Install Nexus and Gogs in a ci namespace
-      create-users                   Creates two users: admin/admin123 and developer/developer
+      create-users                   Creates two users: admin/admin123 and devel/devel
       all                            call all modules
       help                           Help about this command
 
@@ -131,11 +140,14 @@ command.help() {
 EOF
 }
 
+# This command creates 30 PVs on the master host node
 command.persistant-volumes() {
+    info "Creating $NUM_PVs persistent volumes on $HOST:/mnt/pv-data/pv00XX"
     create_pvs "/mnt/pv-data" $NUM_PVs
 }
 
 command.registry() {
+    info "Binding internal image registry to a persistent volume and make it manageable"
     # Apply registry pvc to bound with pv0001
     cat > /tmp/claim.yaml <<EOF 
 apiVersion: v1
@@ -167,6 +179,8 @@ EOF
 }
 
 command.operators() {
+  info "Installing openshift-gitops and openshift-pipelines operators"
+
     cat << EOF > /tmp/operators.yaml 
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -196,6 +210,7 @@ EOF
 }
 
 command.ci() {
+    info "Initialising a CI project in OpenShift with Nexus and GOGS installed"
     oc get ns ci 2>/dev/null  || {
       info "Creating CI project" 
       oc new-project ci > /dev/null
@@ -213,6 +228,7 @@ command.ci() {
 }
 
 command.create-users() {
+    info "Creating an admin and a developer user."
     oc get secret htpass-secret -n openshift-config 2>/dev/null || {
       info "No htpass provider availble, creating new one"
       # create a secret

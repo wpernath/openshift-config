@@ -12,6 +12,23 @@ This is what the script does right now:
 - Setting up a htpasswd identity provider for 2 users
 
 ## Usage
+In order to use this script for the following modules, you first need to be logged into OpenShift as a user with cluster-admin role. This is typically the `kubeadmin` user after a fresh installation.
+
+- persistant-volumes
+- registry
+- operators
+- create-users
+
+The `ci` module does only need to have a user context (devel or developer).
+
+The typical workflow after installing a OpenShift SNO from this page is:
+- Create the OpenShift SNO
+- `./config-snc.sh persistant-volumes`
+- `./config-snc.sh registry`
+- `./config-snc.sh create-users`
+
+
+
 ### persistant-volumes
 ```bash
 $> ./config-snc.sh persistant-volumes -h 192.168.2.23
