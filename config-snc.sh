@@ -272,7 +272,7 @@ main() {
     err "invalid command '$COMMAND'"
   }
 
-  cd $SCRIPT_DIR
+  cd "$SCRIPT_DIR"
   $fn
   return $?
 }
