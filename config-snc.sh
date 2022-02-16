@@ -11,7 +11,10 @@
 set -e -u -o pipefail
 
 declare HOST=192.168.2.23 # set it to your IP
+declare USER=core
 declare NUM_PVs=30
+declare KUBECONFIG=""
+declare OC=oc
 
 declare -r SCRIPT_DIR=$(cd -P $(dirname $0) && pwd)
 declare COMMAND="help"
@@ -33,12 +36,20 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    persistant-volumes|registry|operators|ci|create-users|all)
+    persistent-volumes|registry|operators|ci|create-users|all)
       COMMAND=$1
       shift
       ;;
     -h|--host-name)
       HOST=$2
+      shift 2
+      ;;
+    -u|--user-name)
+      USER=$2
+      shift 2
+      ;;
+    -k|--kubeconfig)
+      KUBECONFIG=$2
       shift 2
       ;;
     --)
@@ -81,7 +92,7 @@ function setup_pv_dirs() {
     local dir="${1}"
     local count="${2}"
 
-    ssh core@$HOST 'sudo bash -x -s' <<EOF
+    ssh $USER@$HOST 'sudo bash -x -s' <<EOF
     for pvsubdir in \$(seq -f "pv%04g" 1 ${count}); do
         mkdir -p "${dir}/\${pvsubdir}"
     done
@@ -99,8 +110,8 @@ function create_pvs() {
     setup_pv_dirs "${pvdir}" "${count}"
 
     for pvname in $(seq -f "pv%04g" 1 ${count}); do
-        if ! oc get pv "${pvname}" &> /dev/null; then
-            generate_pv "${pvdir}/${pvname}" "${pvname}" | oc create -f -
+        if ! $OC get pv "${pvname}" &> /dev/null; then
+            generate_pv "${pvdir}/${pvname}" "${pvname}" | $OC create -f -
         else
             echo "persistentvolume ${pvname} already exists"
         fi
@@ -136,12 +147,14 @@ command.help() {
 
   OPTIONS:
       -h --host-name                 SNC host name
+      -u --user-name                 SNC user name (Default: $USER)
+      -k --kubeconfig                kubeconfig file to be used
       
 EOF
 }
 
 # This command creates 30 PVs on the master host node
-command.persistant-volumes() {
+command.persistent-volumes() {
     info "Creating $NUM_PVs persistent volumes on $HOST:/mnt/pv-data/pv00XX"
     create_pvs "/mnt/pv-data" $NUM_PVs
 }
@@ -166,16 +179,16 @@ spec:
       volume: "pv0001"
 EOF
 
-    cat /tmp/claim.yaml | oc apply -f -
+    cat /tmp/claim.yaml | $OC apply -f -
     
     # Add registry storage to pvc
-    oc patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "add", "path": "/spec/storage/pvc", "value": {"claim": "snc-image-registry-storage"}}]' --type=json
+    $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "add", "path": "/spec/storage/pvc", "value": {"claim": "snc-image-registry-storage"}}]' --type=json
     
     # Remove emptyDir as storage for registry
     #oc patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "remove", "path": "/spec/storage/emptyDir"}]' --type=json
 
     # set registry to Managed in order to make use of it!
-    oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+    $OC patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
 }
 
 command.operators() {
@@ -206,39 +219,39 @@ spec:
 
 EOF
 
-    cat /tmp/operators.yaml | oc apply -f -
+    cat /tmp/operators.yaml | $OC apply -f -
 }
 
 command.ci() {
     info "Initialising a CI project in OpenShift with Nexus and GOGS installed"
-    oc get ns ci 2>/dev/null  || {
+    $OC get ns ci 2>/dev/null  || {
       info "Creating CI project" 
-      oc new-project ci > /dev/null
+      $OC new-project ci > /dev/null
 
-      oc apply -f "$SCRIPT_DIR/support/nexus.yaml" --namespace ci
-      oc apply -f "$SCRIPT_DIR/support/gogs.yaml" --namespace ci
+      $OC apply -f "$SCRIPT_DIR/support/nexus.yaml" --namespace ci
+      $OC apply -f "$SCRIPT_DIR/support/gogs.yaml" --namespace ci
       GOGS_HOSTNAME=$(oc get route gogs -o template --template='{{.spec.host}}')
       info "Gogs Hostname: $GOGS_HOSTNAME"
 
       info "Initiatlizing git repository in Gogs and configuring webhooks"
-      sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | oc apply --namespace ci -f - 
-      oc rollout status deployment/gogs --namespace ci
-      oc create -f support/gogs-init-taskrun.yaml --namespace ci
+      sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | $OC apply --namespace ci -f - 
+      $OC rollout status deployment/gogs --namespace ci
+      $OC create -f support/gogs-init-taskrun.yaml --namespace ci
     }
 }
 
 command.create-users() {
     info "Creating an admin and a developer user."
-    oc get secret htpass-secret -n openshift-config 2>/dev/null || {
+    $OC get secret htpass-secret -n openshift-config 2>/dev/null || {
       info "No htpass provider availble, creating new one"
       # create a secret
-      oc create secret generic htpass-secret --from-file=htpasswd="$SCRIPT_DIR/support/htpasswd" -n openshift-config
+      $OC create secret generic htpass-secret --from-file=htpasswd="$SCRIPT_DIR/support/htpasswd" -n openshift-config
 
       # create the CR
-      oc apply -f "$SCRIPT_DIR/support/htpasswd-cr.yaml" -n openshift-config
+      $OC apply -f "$SCRIPT_DIR/support/htpasswd-cr.yaml" -n openshift-config
     } && {
       info "Changing existing htpass-secret file to add devel/devel and admin/admin123"
-      oc get secret htpass-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > /tmp/users.htpasswd
+      $OC get secret htpass-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > /tmp/users.htpasswd
       
       info "Existing users"
       cat /tmp/users.htpasswd 
@@ -249,12 +262,12 @@ command.create-users() {
 
       cat /tmp/users.htpasswd
 
-      oc create secret generic htpass-secret --from-file=htpasswd=/tmp/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+      $OC create secret generic htpass-secret --from-file=htpasswd=/tmp/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
 
     }
 
     # we want admin be cluster-admin
-    oc adm policy add-cluster-role-to-user cluster-admin admin
+    $OC adm policy add-cluster-role-to-user cluster-admin admin
 }
 
 
@@ -271,6 +284,15 @@ main() {
   valid_command "$fn" || {
     err "invalid command '$COMMAND'"
   }
+
+  # setup OC command
+  if [ -n "$KUBECONFIG" ]; then
+    info "Using kubeconfig $KUBECONFIG"
+    OC="oc --kubeconfig $KUBECONFIG"
+  else
+    info "Using default kubeconfig"
+    OC="oc"
+  fi 
 
   cd "$SCRIPT_DIR"
   $fn
