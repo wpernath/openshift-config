@@ -216,6 +216,28 @@ spec:
   name: openshift-pipelines-operator-rh
   source: redhat-operators 
   sourceNamespace: openshift-marketplace 
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-serverless
+  namespace: openshift-operators 
+spec:
+  channel: stable 
+  name: serverless-operator
+  source: redhat-operators 
+  sourceNamespace: openshift-marketplace 
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: crunchy-postgres-operator
+  namespace: openshift-operators 
+spec:
+  channel: stable 
+  name: crunchy-postgres-operator
+  source: certified-operators 
+  sourceNamespace: openshift-marketplace 
 
 EOF
 
