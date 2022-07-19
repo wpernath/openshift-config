@@ -234,7 +234,7 @@ metadata:
   name: crunchy-postgres-operator
   namespace: openshift-operators 
 spec:
-  channel: stable 
+  channel: v5 
   name: crunchy-postgres-operator
   source: certified-operators 
   sourceNamespace: openshift-marketplace 
