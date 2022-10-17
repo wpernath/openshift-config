@@ -12,7 +12,7 @@ set -e -u -o pipefail
 
 declare HOST=192.168.2.23 # set it to your IP
 declare USER=core
-declare NUM_PVs=30
+declare NUM_PVs=100
 declare KUBECONFIG=""
 declare OC=oc
 
@@ -77,7 +77,7 @@ metadata:
     volume: ${name}
 spec:
   capacity:
-    storage: 100Gi
+    storage: 5Gi
   accessModes:
     - ReadWriteOnce
     - ReadWriteMany
@@ -157,6 +157,9 @@ EOF
 command.persistent-volumes() {
     info "Creating $NUM_PVs persistent volumes on $HOST:/mnt/pv-data/pv00XX"
     create_pvs "/mnt/pv-data" $NUM_PVs
+
+    info "Recycle PVs are deprecated. In order to work around this for now,\nwe are going to enforce privileged pod security. DON'T DO THIS ON PROD SERVERS!"
+    $OC label  --overwrite ns openshift-infra  pod-security.kubernetes.io/enforce=privileged
 }
 
 command.registry() {
