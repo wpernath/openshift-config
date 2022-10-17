@@ -204,7 +204,7 @@ metadata:
   name: openshift-gitops
   namespace: openshift-operators 
 spec:
-  channel: stable 
+  channel: latest 
   name: openshift-gitops-operator
   source: redhat-operators 
   sourceNamespace: openshift-marketplace 
@@ -215,7 +215,7 @@ metadata:
   name: openshift-pipelines
   namespace: openshift-operators 
 spec:
-  channel: stable 
+  channel: latest 
   name: openshift-pipelines-operator-rh
   source: redhat-operators 
   sourceNamespace: openshift-marketplace 
@@ -241,7 +241,18 @@ spec:
   name: crunchy-postgres-operator
   source: certified-operators 
   sourceNamespace: openshift-marketplace 
-
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: strimzi-kafka-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: strimzi-kafka-operator
+  source: community-operators 
+  sourceNamespace: openshift-marketplace 
 EOF
 
     cat /tmp/operators.yaml | $OC apply -f -
