@@ -65,59 +65,6 @@ while (( "$#" )); do
 done
 
 
-function generate_pv() {
-  local pvdir="${1}"
-  local name="${2}"
-cat <<EOF
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: ${name}
-  labels:
-    volume: ${name}
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-    - ReadWriteMany
-    - ReadOnlyMany
-  hostPath:
-    path: ${pvdir}
-  persistentVolumeReclaimPolicy: Recycle
-EOF
-}
-
-function setup_pv_dirs() {
-    local dir="${1}"
-    local count="${2}"
-
-    ssh $USER@$HOST 'sudo bash -x -s' <<EOF
-    for pvsubdir in \$(seq -f "pv%04g" 1 ${count}); do
-        mkdir -p "${dir}/\${pvsubdir}"
-    done
-    if ! chcon -R -t svirt_sandbox_file_t "${dir}" &> /dev/null; then
-        echo "Failed to set SELinux context on ${dir}"
-    fi
-    chmod -R 770 ${dir}
-EOF
-}
-
-function create_pvs() {
-    local pvdir="${1}"
-    local count="${2}"
-
-    setup_pv_dirs "${pvdir}" "${count}"
-
-    for pvname in $(seq -f "pv%04g" 1 ${count}); do
-        if ! $OC get pv "${pvname}" &> /dev/null; then
-            generate_pv "${pvdir}/${pvname}" "${pvname}" | $OC create -f -
-        else
-            echo "persistentvolume ${pvname} already exists"
-        fi
-    done
-}
-
 command.help() {
   cat <<-EOF
   Provides some functions to make an OpenShift Single Node Cluster usable. 
@@ -155,11 +102,28 @@ EOF
 
 # This command creates 30 PVs on the master host node
 command.persistent-volumes() {
-    info "Creating $NUM_PVs persistent volumes on $HOST:/mnt/pv-data/pv00XX"
-    create_pvs "/mnt/pv-data" $NUM_PVs
+    info "Installing kubevirt CSI hostpath provisioner"
 
-    info "Recycle PVs are deprecated. In order to work around this for now,\nwe are going to enforce privileged pod security. DON'T DO THIS ON PROD SERVERS!"
-    $OC label  --overwrite ns openshift-infra  pod-security.kubernetes.io/enforce=privileged
+    # Create hostpath-provisioner namespace
+    ${OC} apply -f support/hpp/namespace.yaml
+
+    # Add external provisioner RBACs
+    ${OC} apply -f support/hpp/external-provisioner-rbac.yaml -n hostpath-provisioner
+
+    # Create CSIDriver/kubevirt.io.hostpath-provisioner resource
+    ${OC} apply -f support/hpp/csi-driver-hostpath-provisioner.yaml -n hostpath-provisioner
+
+    # Apply SCC allowin hostpath-provisioner containers to run as root and access host network
+    ${OC} apply -f support/hpp/kubevirt-hostpath-security-constraints-csi.yaml
+
+    # Deploy csi driver components
+    ${OC} apply -f support/hpp/csi-driver/csi-kubevirt-hostpath-provisioner.yaml -n hostpath-provisioner
+
+    # create StorageClass crc-csi-hostpath-provisioner
+    ${OC} apply -f support/hpp/csi-sc.yaml
+
+    #info "Recycle PVs are deprecated. In order to work around this for now,\nwe are going to enforce privileged pod security. DON'T DO THIS ON PROD SERVERS!"
+    #$OC label  --overwrite ns openshift-infra  pod-security.kubernetes.io/enforce=privileged
 }
 
 command.registry() {
@@ -169,26 +133,24 @@ command.registry() {
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: snc-image-registry-storage	
+  name: crc-image-registry-storage
   namespace: openshift-image-registry
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 100Gi
-  selector:
-    matchLabels:
-      volume: "pv0001"
+      storage: 20Gi
+  storageClassName: crc-csi-hostpath-provisioner
 EOF
 
     cat /tmp/claim.yaml | $OC apply -f -
     
     # Add registry storage to pvc
-    $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "add", "path": "/spec/storage/pvc", "value": {"claim": "snc-image-registry-storage"}}]' --type=json
+    $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "add", "path": "/spec/storage/pvc", "value": {"claim": "crc-image-registry-storage"}}]' --type=json
     
     # Remove emptyDir as storage for registry
-    #oc patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "remove", "path": "/spec/storage/emptyDir"}]' --type=json
+    $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "remove", "path": "/spec/storage/emptyDir"}]' --type=json
 
     # set registry to Managed in order to make use of it!
     $OC patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
