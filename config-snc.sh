@@ -153,7 +153,7 @@ EOF
     $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "remove", "path": "/spec/storage/emptyDir"}]' --type=json
 
     # set registry to Managed in order to make use of it!
-    $OC patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+    $OC patch config.imageregistry.operator.openshift.io/cluster --patch='[{"op": "merge", "path": "/spec/managementState":"Managed"}]' --type=json
 }
 
 command.operators() {
