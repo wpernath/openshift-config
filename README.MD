@@ -29,14 +29,10 @@ The typical workflow after installing a OpenShift SNO from this page is:
 
 ### persistent-volumes
 ```bash
-$> ./config-snc.sh persistent-volumes -h 192.168.2.23
+$> ./config-snc.sh persistent-volumes 
 ```
 
-This creates 30 volumes within /mnt/pv-data on the SNO host at 192.168.2.23. Make sure, you're able to ssh into the machine. By default you should be able to do so without password, as the installer has your public key. 
-
-```bash
-$> ssh core@192.168.2.23
-```
+This installs the CSI kubevirt hostpath provisioner into the target OpenShift installation. It also creates a StorageClass which will then be used for all PVs.
 
 ### registry
 ```bash
