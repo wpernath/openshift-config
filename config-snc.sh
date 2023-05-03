@@ -137,11 +137,11 @@ metadata:
   namespace: openshift-image-registry
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 20Gi
-  storageClassName: crc-csi-hostpath-provisioner
+  # storageClassName: crc-csi-hostpath-provisioner
 EOF
 
     cat /tmp/claim.yaml | $OC apply -f -
