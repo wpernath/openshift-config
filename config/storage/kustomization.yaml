@@ -1,9 +1,12 @@
-resources:
-  - csi-kubevirt-hostpath-provisioner.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: hostpath-provisioner
+
 images:
   - name: quay.io/kubevirt/hostpath-csi-driver
-    newName: quay.io/crcont/hostpath-csi-driver
-    newTag: v4.11.0
+    newName: registry.redhat.io/container-native-virtualization/hostpath-csi-driver-rhel9
+    newTag: v4.13
   - name: k8s.gcr.io/sig-storage/csi-node-driver-registrar
     newName: registry.redhat.io/openshift4/ose-csi-node-driver-registrar
     newTag: latest
@@ -13,3 +16,11 @@ images:
   - name: k8s.gcr.io/sig-storage/csi-provisioner
     newName: registry.redhat.io/openshift4/ose-csi-external-provisioner
     newTag: latest
+
+resources:
+- namespace.yaml
+- external-provisioner-rbac.yaml
+- csi-driver-hostpath-provisioner.yaml
+- kubevirt-hostpath-security-constraints-csi.yaml
+- csi-driver/csi-kubevirt-hostpath-provisioner.yaml
+- csi-sc.yaml
