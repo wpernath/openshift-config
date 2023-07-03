@@ -3,64 +3,66 @@ This is a script which has some configuration modules for a fresh and clean Open
 
 This is what the script does right now:
 
-- Creating 30 persistent volumens (locally on the OpenShift VM)
+- It is setting up Kubevirt Hostpath Provisioner for storage
 - Configuring the internal registry to be able to store images
-- Installing some operators (namely gitops, serverless and pipelines) for demo purposes
-- Setting up a 'ci' namespace with nexus and Gogs ready to use
+- Installing some operators (namely gitops, serverless and pipelines, postgresql and strimzi) for demo purposes
+- Setting up a 'ci' namespace with nexus and Gitea ready to use
 - Setting up a htpasswd identity provider for 2 users
 
 ## Usage
 In order to use this script for the following modules, you first need to be logged into OpenShift as a user with cluster-admin role. This is typically the `kubeadmin` user after a fresh installation.
 
-- persistent-volumes
+- storage
 - registry
 - operators
-- create-users
+- ci
+- users
 
 The `ci` module does only need to have a user context (devel or developer).
 
 The typical workflow after installing a OpenShift SNO from this page is:
 - Create the OpenShift SNO
-- `./config-snc.sh persistent-volumes`
-- `./config-snc.sh registry`
-- `./config-snc.sh create-users`
+- `./setup.sh storage`
+- `./setup.sh registry`
+- `./setup.sh users`
+- 
 
 
 
-### persistent-volumes
+### storage
 ```bash
-$> ./config-snc.sh persistent-volumes 
+$> ./setup.sh storage
 ```
 
 This installs the CSI kubevirt hostpath provisioner into the target OpenShift installation. It also creates a StorageClass which will then be used for all PVs.
 
 ### registry
 ```bash
-$> ./config-snc.sh registry 
+$> ./setup.sh registry 
 ```
 
 This switches the internal registry to "Managed" and binds it to a PV called pv0001. For this module, you must be logged in as kube:admin in your cluster. 
 
 ### operators
 ```bash
-$> ./config-snc.sh operators
+$> ./setup.sh operators
 ```
 
-This installs the gitops and the pipelines operators. Please make sure to be logged into the openshift instance as cluster-admin. And you already should have persistent volumes available.
+This installs several operators. Please make sure to be logged into the OpenShift instance as cluster-admin. And you already should have storage available.
 
 ### ci
 ```bash
-$> ./config-snc.sh ci
+$> ./setup.sh ci
 ```
 
-This installs a Nexus and Gogs into a newly created namespace called ci. It also clones 3 repositories from github.com into Gogs. After that it prints out the access to both instances. By default, we are using
+This installs a Nexus and Gitea into a newly created namespace called ci. It also clones 3 repositories from github.com into Gitea. After that it prints out the access to both instances. By default, we are using
 
 - Nexus: admin/admin123
-- Gogs: gogs/gogs
+- Gitea: gitea/openshift
 
-### create-users
+### users
 ```bash
-$> ./config-snc.sh create-users 
+$> ./setup.sh users 
 ```
 This adds a HTPasswd identity provider to the cluster with 2 users in it:
 - admin/admin123 -> cluster-admin

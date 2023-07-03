@@ -1,0 +1,111 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:  
+  generateName: init-gitea-
+spec:
+  taskSpec:
+    params:
+    - name: GITEA_USER
+      type: string
+      description: Gitea admin username
+      default: gitea
+    - name: GITEA_PASSWORD
+      type: string
+      description: Gitea admin password
+      default: openshift
+    stepTemplate:
+      env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace              
+    steps:
+      - name: config-gitea
+        image: quay.io/wpernath/kustomize-ubi:latest
+        script: |
+          #!/usr/bin/env bash
+          echo "hello"
+          kubectl get route gitea -o template --template="{{.spec.host}}" 
+
+      - name: init-gitea
+        image: quay.io/siamaksade/python-oc
+        script: |
+          #!/usr/bin/env python3
+
+          import os
+          import requests 
+
+          gitea_user = "$(params.GITEA_USER)"
+          gitea_pwd = "$(params.GITEA_PASSWORD)"
+          giteaURL = "http://" + os.popen('oc get route gitea -o template --template="{{.spec.host}}"').read() 
+
+          # create admin user
+          data_user = {
+          'user_name': gitea_user,
+          'password': gitea_pwd,
+          'retype': gitea_pwd,
+          'email': 'admin@gitea.com'
+          }
+
+          resp = requests.post(url = giteaURL + "/user/sign_up", data = data_user) 
+
+          if resp.status_code != 200:
+            print("Error creating Gitea admin (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created admin user {}:{}".format(gitea_user, gitea_pwd))
+
+          # create git repo spring-petclinic
+          data_repo = '{"clone_addr": "https://github.com/wpernath/quarkus-grumpycat.git", "uid": 1, "repo_name": "quarkus-grumpycat"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo quarkus-grumpycat")
+
+          # create git repo spring-petclinic-config
+          data_repo = '{"clone_addr": "https://github.com/wpernath/grumpycat-config.git", "uid": 1, "repo_name": "grumpycat-config"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo grumpycat-config")
+
+          # create git repo simple-openshift-sinatra-sti
+          data_repo = '{"clone_addr": "https://github.com/wpernath/simple-openshift-sinatra-sti.git", "uid": 1, "repo_name": "simple-openshift-sinatra"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo grumpycat-config")
+
+          # create git repo 
+          data_repo = '{"clone_addr": "https://github.com/wpernath/quarkus-demo-service.git", "uid": 1, "repo_name": "quarkus-demo-service"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo grumpycat-config")
+
+
+          # create token for user
+          data_token = '{"name": "cicd"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/users/" + gitea_user + "/tokens", headers = headers, auth = (gitea_user, gitea_pwd), data = data_token)  
+          resp.raise_for_status()
+          gitea_token = resp.json()["sha1"]
+          print("## Token: " + gitea_token + " ##")
+
+          os.popen('oc create secret generic gitea --from-literal=token=' + gitea_token + ' --from-literal=webhook=""')
