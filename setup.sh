@@ -121,6 +121,14 @@ command.operators() {
 command.ci() {
     info "Initialising a CI project in OpenShift with Nexus and Gitea installed"
     $OC apply -k $SCRIPT_DIR/config/ci
+
+    GITEA_HOST=$($OC get route gitea -o template --template="{{.spec.host}}" -n ci)
+    sed "s/@HOSTNAME/$GITEA_HOST/g" $SCRIPT_DIR/config/ci/gitea-config.yaml | $OC create -f - -n ci
+    
+    $OC rollout status deployment/gitea -n ci
+    $OC create -f $SCRIPT_DIR/config/ci/gitea-init-run.yaml -n ci
+    
+
 }
 
 command.users() {

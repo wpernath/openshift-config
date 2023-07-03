@@ -7,5 +7,5 @@ resources:
 - ns.yaml
 - nexus.yaml
 - gitea.yaml
-- gitea-config.yaml
-#- 
+#- gitea-config.yaml
+#- gitea-init-run.yaml
