@@ -123,11 +123,26 @@ command.ci() {
     $OC apply -k $SCRIPT_DIR/config/ci
 
     GITEA_HOST=$($OC get route gitea -o template --template="{{.spec.host}}" -n ci)
+    NEXUS_HOST=$($OC get route nexus -o template --template="{{.spec.host}}" -n ci)
     sed "s/@HOSTNAME/$GITEA_HOST/g" $SCRIPT_DIR/config/ci/gitea-config.yaml | $OC create -f - -n ci
     
     $OC rollout status deployment/gitea -n ci
     $OC create -f $SCRIPT_DIR/config/ci/gitea-init-run.yaml -n ci
     
+    cat <<-EOF
+    Installed Nexus and Gitea. 
+    SonaType Nexus: 
+      HOST: http://$NEXUS_HOST/
+      USER: admin
+      PWD : admin123
+
+    Gitea Git Repository:
+      HOST: http://$GITEA_HOST/
+      USER: gitea
+      PWD : openshift      
+
+    Please wait a little bit until both instances have been rolled out successfully.
+EOF
 }
 
 command.users() {
