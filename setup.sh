@@ -128,7 +128,6 @@ command.ci() {
     $OC rollout status deployment/gitea -n ci
     $OC create -f $SCRIPT_DIR/config/ci/gitea-init-run.yaml -n ci
     
-
 }
 
 command.users() {
