@@ -80,8 +80,11 @@ command.help() {
   Usage:
       setup.sh [command] [options]
   
-  Example:
-      setup.sh all 
+  Examples:
+      ./setup.sh storage
+      ./setup.sh registry
+      ./setup.sh users
+      ./setup.sh all 
   
   COMMANDS:
       storage                        Setup CSI kubevirt hostpath provisioner
@@ -101,41 +104,28 @@ EOF
 # This command sets up the kubevirt hostpath provisioner
 command.storage() {
     info "Installing kubevirt CSI hostpath provisioner"
-    $OC apply -k config/storage
+    $OC apply -k $SCRIPT_DIR/config/storage
 }
 
 command.registry() {
     info "Binding internal image registry to a persistent volume and make it manageable"
     # Apply registry pvc to bound with pv0001
-    $OC apply -k config/registry
+    $OC apply -k $SCRIPT_DIR/config/registry
 }
 
 command.operators() {
-  info "Installing openshift-gitops and openshift-pipelines operators"
-  $OC apply -k config/operators
+  info "Installing a bunch of operators..."
+  $OC apply -k $SCRIPT_DIR/config/operators/
 }
 
 command.ci() {
-    info "Initialising a CI project in OpenShift with Nexus and GOGS installed"
-    $OC get ns ci 2>/dev/null  || {
-      info "Creating CI project" 
-      $OC new-project ci > /dev/null
-
-      $OC apply -f "$SCRIPT_DIR/support/nexus.yaml" --namespace ci
-      $OC apply -f "$SCRIPT_DIR/support/gogs.yaml" --namespace ci
-      GOGS_HOSTNAME=$(oc get route gogs -o template --template='{{.spec.host}}')
-      info "Gogs Hostname: $GOGS_HOSTNAME"
-
-      info "Initiatlizing git repository in Gogs and configuring webhooks"
-      sed "s/@HOSTNAME/$GOGS_HOSTNAME/g" support/gogs-configmap.yaml | $OC apply --namespace ci -f - 
-      $OC rollout status deployment/gogs --namespace ci
-      $OC create -f support/gogs-init-taskrun.yaml --namespace ci
-    }
+    info "Initialising a CI project in OpenShift with Nexus and Gitea installed"
+    $OC apply -k $SCRIPT_DIR/config/ci
 }
 
 command.users() {
     info "Creating an admin and a developer user."
-    $OC apply -k config/users
+    $OC apply -k $SCRIPT_DIR/config/users
     # we want admin be cluster-admin
     $OC adm policy add-cluster-role-to-user cluster-admin admin
 
