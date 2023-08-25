@@ -1,0 +1,35 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: application-menu-link-1
+spec:
+  href: 'https://github.com/wpernath'
+  location: ApplicationMenu
+  text: Wanja's GitHub
+  applicationMenu:
+    section: Other Links
+    imageURL: https://avatars.githubusercontent.com/u/1204218?v=4
+---
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: application-menu-link-2
+spec:
+  href: 'https://www.opensourcerers.org/category/cloud-native-application-development/'
+  location: ApplicationMenu
+  text: OpenSourcerers Blog
+  applicationMenu:
+    section: Other Links
+    imageURL: https://www.opensourcerers.org/wp-content/uploads/2020/09/cropped-opensourcerers_logo_FULL.png
+---
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: application-menu-link-3
+spec:
+  href: 'https://developers.redhat.com/e-books/getting-gitops-practical-platform-openshift-argo-cd-and-tekton'
+  location: ApplicationMenu
+  text: Getting GitOps by Wanja
+  applicationMenu:
+    section: Other Links
+    imageURL: https://developers.redhat.com/sites/default/files/styles/cheat_sheet_feature/public/GettingGitOps-book-cover.png?itok=30D-nnPL

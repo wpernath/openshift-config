@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    storage|registry|operators|ci|users|all)
+    console|storage|registry|operators|ci|users|all)
       COMMAND=$1
       shift
       ;;
@@ -87,6 +87,7 @@ command.help() {
       ./setup.sh all 
   
   COMMANDS:
+      console                        Adds some links to the App menu and some APIs to the left menu
       storage                        Setup CSI kubevirt hostpath provisioner
       registry                       Setup internal image registry to use a PVC and accept requests
       operators                      Install gitops and pipeline operators
@@ -99,6 +100,11 @@ command.help() {
       -k --kubeconfig                kubeconfig file to be used
       
 EOF
+}
+
+command.console() {
+    info "Configuring the OpenShift Console"
+    $OC apply -k $SCRIPT_DIR/config/console
 }
 
 # This command sets up the kubevirt hostpath provisioner
@@ -141,11 +147,12 @@ command.users() {
 
 
 command.all() {
+    command.console
     command.storage
     command.registry
     command.users
     command.operators
-    command.ci
+    command.ci    
 }
 
 main() {

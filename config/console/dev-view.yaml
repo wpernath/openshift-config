@@ -1,0 +1,33 @@
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  annotations:
+  name: cluster
+spec:
+  customization:
+    perspectives:
+    - id: dev
+      pinnedResources:
+      - group: ""
+        resource: configmaps
+        version: v1
+      - group: ""
+        resource: secrets
+        version: v1
+      - group: ""
+        resource: pods
+        version: v1
+      - group: ""
+        resource: persistentvolumeclaims
+        version: v1
+      - group: route.openshift.io
+        resource: routes
+        version: v1
+      - group: apps
+        resource: deployments
+        version: v1
+      - group: ""
+        resource: services
+        version: v1
+      visibility:
+        state: Enabled
