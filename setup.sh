@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    console|storage|registry|operators|ci|users|all)
+    crc|sno|aws|console|storage|registry|operators|ci|users|all)
       COMMAND=$1
       shift
       ;;
@@ -93,8 +93,13 @@ command.help() {
       operators                      Install gitops and pipeline operators
       ci                             Install Nexus and Gogs in a ci namespace
       users                          Creates two users: admin/admin123 and devel/devel
-      all                            call all modules
       help                           Help about this command
+
+  ENVIRONMENTS:    
+      all                            calls all modules
+      sno                            Fresh SNO: like all, except ci
+      aws                            demo.redhat.com workshop: calls console, operators and ci
+      crc                            Fresh CRC: calls console, operators, 
 
   OPTIONS:
       -k --kubeconfig                kubeconfig file to be used
@@ -145,13 +150,28 @@ command.users() {
     info "Please wait a while until OpenShift has updated OAuth management"
 }
 
+command.crc() {
+    command.console
+    command.operators
+    command.ci
+}
+
+command.sno() {
+    $OC apply -k $SCRIPT_DIR/config
+    command.storage
+    command.users
+}
+
+command.aws() {
+  command.operators
+  command.console
+  command.ci
+}
 
 command.all() {
-    command.console
+    $OC apply -k $SCRIPT_DIR/config
     command.storage
-    command.registry
     command.users
-    command.operators
     command.ci    
 }
 
