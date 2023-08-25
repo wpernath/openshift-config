@@ -140,7 +140,7 @@ command.users() {
     info "Creating an admin and a developer user."
     $OC apply -k $SCRIPT_DIR/config/users
     # we want admin be cluster-admin
-    $OC adm policy add-cluster-role-to-user cluster-admin admin
+    #$OC adm policy add-cluster-role-to-user cluster-admin admin
 
     info "Please wait a while until OpenShift has updated OAuth management"
 }

@@ -11,3 +11,4 @@ secretGenerator:
 
 resources:
 - htpasswd-cr.yaml
+- admin-rb.yaml
