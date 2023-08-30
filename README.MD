@@ -91,3 +91,9 @@ Installs some links to the openshift console and makes sure, developer view cont
 $> ./setup.sh mesh
 ```
 Installs Red Hat OpenShift ServiceMesh and adds the grumpycat application to the mesh.
+
+This can be uninstalled by executing 
+```bash
+$> oc apply -k config/mesh
+````
+``
