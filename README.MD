@@ -8,6 +8,8 @@ This is what the script does right now:
 - Installing some operators (namely gitops, serverless and pipelines, postgresql and strimzi) for demo purposes
 - Setting up a 'ci' namespace with nexus and Gitea ready to use
 - Setting up a htpasswd identity provider for 2 users: admin and devel. admin is cluster-admin
+- Configuring openshift console to show links and other resources for demo purposes
+- Installing and configuring OpenShift ServiceMesh for demo
 
 ## Usage
 In order to use this script, you first need to be logged into OpenShift as a user with cluster-admin role. This is typically the `kubeadmin` user after a fresh installation.
@@ -19,6 +21,7 @@ The following modules are available:
 - operators
 - ci
 - users
+- mesh
 
 The `ci` module does only need to have a user context (devel or developer).
 
@@ -27,8 +30,13 @@ The typical workflow after installing a OpenShift SNO from this page is:
 - `./setup.sh storage`
 - `./setup.sh registry`
 - `./setup.sh users`
-- 
 
+
+You could also let openshift-config decide what to install in your freshly installed OpenShift cluster by specifying an environment:
+- sno: installs everything necessary (console, operators, storage, registry, users)
+- crc: installs only necessary (console, operators, users)
+- aws: installs only necessary (console, operators, users)
+- all: like sno
 
 
 ### storage
@@ -71,3 +79,15 @@ This adds a HTPasswd identity provider to the cluster with 2 users in it:
 - devel/devel -> normal user
 
 You need to be logged into OpenShift with cluster-admin rights.
+
+### console
+```bash
+$> ./setup.sh console
+```
+Installs some links to the openshift console and makes sure, developer view contains additional links to resources: pod, service, pvc, route
+
+### mesh
+```bash
+$> ./setup.sh mesh
+```
+Installs Red Hat OpenShift ServiceMesh and adds the grumpycat application to the mesh.
