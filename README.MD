@@ -7,11 +7,13 @@ This is what the script does right now:
 - Configuring the internal registry to be able to store images
 - Installing some operators (namely gitops, serverless and pipelines, postgresql and strimzi) for demo purposes
 - Setting up a 'ci' namespace with nexus and Gitea ready to use
-- Setting up a htpasswd identity provider for 2 users
+- Setting up a htpasswd identity provider for 2 users: admin and devel. admin is cluster-admin
 
 ## Usage
-In order to use this script for the following modules, you first need to be logged into OpenShift as a user with cluster-admin role. This is typically the `kubeadmin` user after a fresh installation.
+In order to use this script, you first need to be logged into OpenShift as a user with cluster-admin role. This is typically the `kubeadmin` user after a fresh installation.
 
+The following modules are available:
+- console
 - storage
 - registry
 - operators
