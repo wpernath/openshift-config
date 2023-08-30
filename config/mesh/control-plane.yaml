@@ -17,6 +17,11 @@ spec:
     type: Istiod
   telemetry:
     type: Istiod
+  # enable access logging!
+  proxy:
+    accessLogging:
+      file:
+        name: /dev/stdout
   addons:
     jaeger:
       install:

@@ -7,4 +7,9 @@ spec:
   members:
     # a list of projects joined into the service mesh
     - grumpycat
+    - ci
+    - cat-ci
+    - cat-dev
+    - cat-stage
+    - cat-prod
     
