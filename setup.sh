@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    crc|sno|aws|console|storage|registry|operators|ci|users|all)
+    mesh|crc|sno|aws|console|storage|registry|operators|ci|users|all)
       COMMAND=$1
       shift
       ;;
@@ -93,6 +93,7 @@ command.help() {
       operators                      Install gitops and pipeline operators
       ci                             Install Nexus and Gogs in a ci namespace
       users                          Creates two users: admin/admin123 and devel/devel
+      mesh                           Installs and configures RH Service Mesh 
       help                           Help about this command
 
   ENVIRONMENTS:    
@@ -105,6 +106,11 @@ command.help() {
       -k --kubeconfig                kubeconfig file to be used
       
 EOF
+}
+
+command.mesh() {
+    info "Configuring Red Hat OpenShift ServiceMesh operator"
+    $OC apply -k $SCRIPT_DIR/config/mesh
 }
 
 command.console() {
