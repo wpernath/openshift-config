@@ -5,6 +5,7 @@ metadata:
   - imageregistry.operator.openshift.io/finalizer
   name: cluster
 spec:
+  defaultRoute: true
   logLevel: Normal
   managementState: Managed  
   operatorLogLevel: Normal
@@ -18,6 +19,6 @@ spec:
   rolloutStrategy: RollingUpdate
   storage: 
     pvc:
-      claim: crc-image-registry-storage
+      claim: image-registry-storage
       
   
