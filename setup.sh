@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    mesh|crc|sno|aws|console|storage|registry|operators|ci|users|all)
+    mesh|crc|sno|aws|monitoring|console|storage|registry|operators|ci|users|all)
       COMMAND=$1
       shift
       ;;
@@ -91,6 +91,7 @@ command.help() {
       storage                        Setup CSI kubevirt hostpath provisioner
       registry                       Setup internal image registry to use a PVC and accept requests
       operators                      Install gitops and pipeline operators
+      monitoring                     Configure OpenShift monitoring and user monitoring
       ci                             Install Nexus and Gogs in a ci namespace
       users                          Creates two users: admin/admin123 and devel/devel
       mesh                           Installs and configures RH Service Mesh 
@@ -116,6 +117,11 @@ command.mesh() {
 command.console() {
     info "Configuring the OpenShift Console"
     $OC apply -k $SCRIPT_DIR/config/console
+}
+
+command.monitoring() {
+    info "Configuring the OpenShift Monitoring and User Monitoring"
+    $OC apply -k $SCRIPT_DIR/config/monitoring
 }
 
 # This command sets up the kubevirt hostpath provisioner
@@ -164,6 +170,7 @@ command.crc() {
 
 command.sno() {
     $OC apply -k $SCRIPT_DIR/config
+    command.monitoring
     command.storage
     command.users
 }
@@ -172,6 +179,7 @@ command.aws() {
   command.operators
   command.console
   command.ci
+  command.monitoring
 }
 
 command.all() {
@@ -179,6 +187,7 @@ command.all() {
     command.storage
     command.users
     command.ci    
+    command.monitoring
 }
 
 main() {

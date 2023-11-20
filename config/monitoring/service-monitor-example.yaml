@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: cat-server
+  name: cat-monitor
+  namespace: cat-dev
+spec:
+  endpoints:
+  - interval: 10s
+    port: web
+    scheme: http
+    path: /q/metrics
+  selector:
+    matchLabels:
+      app: cat-server      
