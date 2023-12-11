@@ -16,7 +16,7 @@ spec:
       maxWaitInQueue: 0s
     write:
       maxWaitInQueue: 0s
-  rolloutStrategy: RollingUpdate
+  rolloutStrategy: Recreate
   storage: 
     pvc:
       claim: image-registry-storage
