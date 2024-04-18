@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    mesh|crc|sno|aws|monitoring|console|storage|registry|operators|ci|users|all)
+    mesh|crc|sno|aws|monitoring|console|storage|registry|operators|ci|users|all|oauth)
       COMMAND=$1
       shift
       ;;
@@ -87,6 +87,7 @@ command.help() {
       ./setup.sh all 
   
   COMMANDS:
+      oauth                          Adds a SSO provider to OpenShift 
       console                        Adds some links to the App menu and some APIs to the left menu
       storage                        Setup CSI kubevirt hostpath provisioner
       registry                       Setup internal image registry to use a PVC and accept requests
@@ -107,6 +108,18 @@ command.help() {
       -k --kubeconfig                kubeconfig file to be used
       
 EOF
+}
+
+command.oauth() {
+  info "Setting up OAuth2 provider..."
+  cat <<-EOF
+  Configuring SSO OAuth2 authentication provider with OpenShift
+  First go to https://console.developers.google.com/apis/credentials 
+  and generate a new OAuth2 client. Then take the generated Client ID
+  and Client Secret and put them into 
+  $SCRIPT_DIR/config/oauth/client-secret.env
+EOF
+  $OC apply -k $SCRIPT_DIR/config/oauth
 }
 
 command.mesh() {

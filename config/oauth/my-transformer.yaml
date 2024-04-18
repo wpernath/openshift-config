@@ -1,0 +1,4 @@
+varReference:
+  - kind: OAuth
+    #apiVersion: config.openshift.io/v1
+    path: spec/identityProviders/google/clientID

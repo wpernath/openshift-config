@@ -1,11 +1,11 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: amq-kafka-operator
+  name: openshift-builds-operator
   namespace: openshift-operators
 spec:
-  channel: stable
+  channel: latest
   installPlanApproval: Automatic
-  name: amq-streams
+  name: openshift-builds-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace

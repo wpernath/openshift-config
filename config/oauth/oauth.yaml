@@ -1,0 +1,14 @@
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - google:
+      clientID: $(CLIENT_ID)
+      clientSecret:
+        name: google-sso-secret
+      hostedDomain: redhat.com
+    mappingMethod: claim
+    name: RedHatSSO
+    type: Google

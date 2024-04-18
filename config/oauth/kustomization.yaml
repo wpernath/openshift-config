@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- oauth.yaml
+
+configurations:
+  - my-transformer.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: google-sso-secret
+    namespace: openshift-config
+    type: generic
+    env:
+      client-secret.env # reading clientSecret out of a file called client-secret.env
+
+configMapGenerator:
+  - name: google-client
+    env: 
+      client-secret.env
+
+vars:
+  - name: CLIENT_ID
+    objref: 
+      name: google-client
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.clientID
