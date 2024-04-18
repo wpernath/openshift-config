@@ -4,12 +4,15 @@ kind: Kustomization
 resources:
 - oauth.yaml
 
+# Make sure we can update OAuth objects
 configurations:
   - my-transformer.yaml
 
+# we don't need name suffixes
 generatorOptions:
   disableNameSuffixHash: true
 
+# generate a secret with everything from client-secret.env
 secretGenerator:
   - name: google-sso-secret
     namespace: openshift-config
@@ -17,11 +20,15 @@ secretGenerator:
     env:
       client-secret.env # reading clientSecret out of a file called client-secret.env
 
+# generate a config map to get keys from client-secret.env
 configMapGenerator:
   - name: google-client
     env: 
       client-secret.env
 
+# Create a variable called CLIENT ID 
+# which gets its content from the generated 
+# configmap above
 vars:
   - name: CLIENT_ID
     objref: 
