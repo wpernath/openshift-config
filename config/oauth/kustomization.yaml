@@ -18,14 +18,14 @@ secretGenerator:
   - name: google-sso-secret
     namespace: openshift-config
     type: generic
-    env:
-      client-secret.env # reading clientSecret out of a file called client-secret.env
+    envs:
+      - client-secret.env # reading clientSecret out of a file called client-secret.env
 
 # generate a config map to get keys from client-secret.env
 configMapGenerator:
   - name: google-client
-    env: 
-      client-secret.env
+    envs: 
+      - client-secret.env
 
 # Create a variable called CLIENT ID 
 # which gets its content from the generated 
