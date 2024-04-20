@@ -5,7 +5,7 @@ metadata:
 spec:
   identityProviders:
   - google:
-      clientID: $(CLIENT_ID)
+      clientID: CLIENT_ID_PLACEHOLDER
       clientSecret:
         name: google-sso-secret
       hostedDomain: redhat.com

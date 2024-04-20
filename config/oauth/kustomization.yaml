@@ -5,44 +5,53 @@ resources:
 - oauth.yaml
 - admin-rb.yaml
 
-# Make sure we can update OAuth objects
-configurations:
-  - my-transformer.yaml
-
 # we don't need name suffixes
 generatorOptions:
   disableNameSuffixHash: true
 
 # generate a secret with everything from client-secret.env
 secretGenerator:
-  - name: google-sso-secret
-    namespace: openshift-config
-    type: generic
-    envs:
-      - client-secret.env # reading clientSecret out of a file called client-secret.env
+- name: google-sso-secret
+  namespace: openshift-config
+  type: generic
+  envs:
+    - client-secret.env
 
 # generate a config map to get keys from client-secret.env
 configMapGenerator:
-  - name: google-client
-    envs: 
-      - client-secret.env
+- name: tmp-props
+  envs:
+  - client-secret.env
 
-# Create a variable called CLIENT ID 
-# which gets its content from the generated 
-# configmap above
-vars:
-  - name: CLIENT_ID
-    objref: 
-      name: google-client
-      kind: ConfigMap
-      apiVersion: v1
-    fieldref:
-      fieldpath: data.clientID
-  - name: ADMIN_USER
-    objref:
-      name: google-client
-      kind: ConfigMap
-      apiVersion: v1
-    fieldref:
-      fieldpath: data.adminUser
-      
+# Use the vars in ConfigMap google-client to update 
+# properties in OAuth and admin role binding
+replacements:
+# Update clientID in OAuth/spec/identityProviders
+- source:
+    fieldPath: data.clientID
+    kind: ConfigMap
+    name: tmp-props
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.identityProviders.0.google.clientID
+    select:
+      group: config.openshift.io
+      kind: OAuth
+      name: cluster
+      version: v1
+
+# Update user name in admin-rb.yaml
+- source:
+    fieldPath: data.adminUser
+    kind: ConfigMap
+    name: tmp-props
+    version: v1
+  targets:
+  - fieldPaths:
+    - subjects.0.name
+    select:
+      group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+      name: cluster-admin-23435
+      version: v1
