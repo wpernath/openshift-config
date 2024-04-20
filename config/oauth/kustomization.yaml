@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - oauth.yaml
+- admin-rb.yaml
 
 # Make sure we can update OAuth objects
 configurations:
@@ -37,3 +38,11 @@ vars:
       apiVersion: v1
     fieldref:
       fieldpath: data.clientID
+  - name: ADMIN_USER
+    objref:
+      name: google-client
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.adminUser
+      

@@ -1,3 +1,5 @@
 varReference:
   - kind: OAuth
     path: spec/identityProviders/google/clientID
+  - kind: ClusterRoleBinding
+    path: subjects/name

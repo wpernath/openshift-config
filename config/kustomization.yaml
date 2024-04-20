@@ -7,11 +7,12 @@ resources:
   - console/links.yaml
 
 # install all operators
+  - operators/builds.yaml
   - operators/gitops.yaml
+  - operators/crunchy.yaml
   - operators/pipelines.yaml
   - operators/serverless.yaml
   - operators/strimzi.yaml
-  - operators/crunchy.yaml
   
 # configure registry
   - registry/image-registry.yaml
