@@ -1,0 +1,66 @@
+app:
+  title: Wanja's Developer Hub
+  baseUrl: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com
+signInPage: github
+organization:
+  name: Wanja Inc.
+integrations:
+  github:
+    - host: github.com
+      apps:
+        - appId: ${GITHUB_APP_APP_ID}
+          clientId: ${GITHUB_APP_CLIENT_ID}
+          clientSecret: ${GITHUB_APP_CLIENT_SECRET}
+          webhookUrl: ${GITHUB_APP_WEBHOOK_URL}
+          webhookSecret: ${GITHUB_APP_WEBHOOK_SECRET}
+          privateKey: ${GITHUB_APP_PRIVATE_KEY}
+auth:
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: ${GITHUB_OAUTH_CLIENT_ID}
+        clientSecret: ${GITHUB_OAUTH_CLIENT_SECRET}
+backend:
+  auth:
+    keys:
+      - secret: "${BACKEND_SECRET}"
+  baseUrl: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
+  cors:
+    origin: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
+enabled:
+  argocd: true
+  github: true
+  kubernetes: true
+
+# configure kubernets
+kubernetes:
+  clusterLocatorMethods:
+  - clusters:
+    - authProvider: serviceAccount
+      name: ${K8S_CLUSTER_NAME}
+      skipTLSVerify: true
+      url: ${K8S_CLUSTER_URL}
+      serviceAccountToken: ${K8S_CLUSTER_TOKEN}
+    type: config
+  customResources:
+  - apiVersion: v1beta1
+    group: tekton.dev
+    plural: pipelineruns
+  - apiVersion: v1beta1
+    group: tekton.dev
+    plural: taskruns
+  - apiVersion: v1
+    group: route.openshift.io
+    plural: routes    
+  serviceLocatorMethod:
+    type: multiTenant    
+
+# configure software catalog
+catalog:
+  locations:
+  - rules:
+    - allow:
+      - Template
+    target: https://github.com/wpernath/red-hat-developer-hub-software-templates/blob/main/templates.yaml
+    type: url

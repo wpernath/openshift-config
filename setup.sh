@@ -36,7 +36,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    mesh|crc|sno|aws|monitoring|console|storage|registry|operators|ci|users|all|oauth)
+    rhdh|mesh|crc|sno|aws|monitoring|console|storage|registry|operators|ci|users|all|oauth)
       COMMAND=$1
       shift
       ;;
@@ -87,6 +87,7 @@ command.help() {
       ./setup.sh all 
   
   COMMANDS:
+      rhdh                           Installs and configures Red Hat Developer Hub (requires the install of the Operator first)
       oauth                          Adds a SSO provider to OpenShift 
       console                        Adds some links to the App menu and some APIs to the left menu
       storage                        Setup CSI kubevirt hostpath provisioner
@@ -122,9 +123,33 @@ EOF
   $OC apply -k $SCRIPT_DIR/config/oauth
 }
 
+command.rhdh() {
+    info "Installing and configuring OpenShift Developer Hub"
+  cat <<-EOF
+  Please make sure, you've called the 'operators' module first to install
+  all the necessary operators. Then have a look at the 'config/rhdh' folder
+  to configure Developer Hub according to your needs. 
+
+  Copy both config/rhdh/example-*.yaml files to config/rhdh/ without the
+  'example' prefix and make sure they contain YOUR content.
+
+EOF
+    $OC apply -k $SCRIPT_DIR/config/rhdh
+}
+
+
 command.mesh() {
     info "Configuring Red Hat OpenShift ServiceMesh operator"
     $OC apply -k $SCRIPT_DIR/config/mesh
+
+    echo 
+    cat <<-EOF
+    ServiceMesh should have been successfully installed and preconfigured to 
+    include a demo project (grumpycat) into the mesh. If you want to install 
+    the official bookinfo demo project for the mesh, please install it by calling
+
+    $> oc apply -k $SCRIPT_DIR/config/mesh/sample
+EOF
 }
 
 command.console() {

@@ -9,7 +9,10 @@ metadata:
   name: istio
   namespace: istio-system
 spec:
-  version: v2.4
+  gateways:
+    openshiftRoute:
+      enabled: true
+  version: v2.5
   tracing:
     type: Jaeger
     sampling: 10000

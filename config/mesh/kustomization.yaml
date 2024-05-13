@@ -17,6 +17,3 @@ resources:
 # create control plane 
 - control-plane.yaml
 
-# configure control plane to include certain namespaces 
-- sm-members.yaml
-

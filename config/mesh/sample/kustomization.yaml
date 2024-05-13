@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bookinfo
+
+resources:
+- bookinfo-sample.yaml
+- bookinfo-gateway.yaml
+- dest-rules.yaml
+
+# configure control plane to include certain namespaces 
+- sm-members.yaml

@@ -1,2 +1,4 @@
 # DO NOT ADD config/oauth/client-secret.env 
 config/oauth/client-secret.env
+config/rhdh/github-secret.env
+config/rhdh/backend-secret.env
