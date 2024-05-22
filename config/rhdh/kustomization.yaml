@@ -30,3 +30,6 @@ configMapGenerator:
 - name: dynamic-plugins-rhdh
   files:
     - dynamic-plugins.yaml    
+- name: rbac-policy
+  files:
+    - rbac-policy.csv
