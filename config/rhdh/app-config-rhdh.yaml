@@ -24,14 +24,15 @@ auth:
 permission:
   enabled: true
   rbac:
-    policies-csv-file: /opt/app-root/rbac
+#    policies-csv-file: /opt/app-root/rbac
     admin:
       users:
         - name: user:default/wpernath
 backend:
   auth:
+    dangerouslyDisableDefaultAuthPolicy: true
     keys:
-      - secret: ${BACKEND_SECRET}
+      - secret: "${BACKEND_SECRET}"
   baseUrl: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
   cors:
     origin: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
