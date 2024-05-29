@@ -22,7 +22,7 @@ auth:
         clientId: ${GITHUB_OAUTH_CLIENT_ID}
         clientSecret: ${GITHUB_OAUTH_CLIENT_SECRET}
 permission:
-  enabled: true
+  enabled: false
   rbac:
 #    policies-csv-file: /opt/app-root/rbac
     admin:
@@ -30,7 +30,7 @@ permission:
         - name: user:default/wpernath
 backend:
   auth:
-    dangerouslyDisableDefaultAuthPolicy: true
+#    dangerouslyDisableDefaultAuthPolicy: true
     keys:
       - secret: "${BACKEND_SECRET}"
   baseUrl: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
