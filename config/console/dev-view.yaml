@@ -26,6 +26,9 @@ spec:
       - group: apps
         resource: deployments
         version: v1
+      - group: apps
+        resource: statefulsets
+        version: v1
       - group: ""
         resource: services
         version: v1
