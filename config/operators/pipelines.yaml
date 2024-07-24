@@ -7,4 +7,5 @@ spec:
   channel: latest 
   name: openshift-pipelines-operator-rh
   source: redhat-operators 
+  installPlanApproval: Automatic
   sourceNamespace: openshift-marketplace 

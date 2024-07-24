@@ -9,5 +9,6 @@ resources:
 - crunchy.yaml
 - infinispan.yaml
 - rhdh.yaml
+- builds.yaml
 
 

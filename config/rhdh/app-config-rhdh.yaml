@@ -31,8 +31,8 @@ permission:
 backend:
   auth:
 #    dangerouslyDisableDefaultAuthPolicy: true
-    keys:
-      - secret: "${BACKEND_SECRET}"
+#    keys:
+#      - secret: "${BACKEND_SECRET}"
   baseUrl: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/
   cors:
     origin: https://backstage-rhdh-rhdh.apps.grumpycat.sandbox2134.opentlc.com/

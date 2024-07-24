@@ -9,3 +9,4 @@ spec:
   name: infinispan
   source: community-operators
   sourceNamespace: openshift-marketplace
+  

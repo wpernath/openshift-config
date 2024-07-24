@@ -8,4 +8,5 @@ spec:
   name: crunchy-postgres-operator
   source: certified-operators 
   sourceNamespace: openshift-marketplace 
+  installPlanApproval: Automatic
   

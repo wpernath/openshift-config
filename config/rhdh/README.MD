@@ -1,4 +1,6 @@
 # Module: rhdh
+Installing and configuring Red Hat Developer Hub.
+
 ```bash
 $> ./setup.sh rhdh
 or
